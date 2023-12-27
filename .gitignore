@@ -12,3 +12,7 @@ SECRET_CONFIG
 !.env.ci
 !.env
 !.env.template
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*/*/.ipynb_checkpoints/
+*/*/*/.ipynb_checkpoints/
