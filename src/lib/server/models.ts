@@ -12,6 +12,9 @@ import { z } from "zod";
 import endpoints, { endpointSchema, type Endpoint } from "./endpoints/endpoints";
 import endpointTgi from "./endpoints/tgi/endpointTgi";
 import { sum } from "$lib/utils/sum";
+import { embeddingModels, validateEmbeddingModelByName } from "./embeddingModels";
+
+import JSON5 from "json5";
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -66,9 +69,10 @@ const modelConfig = z.object({
 		.optional(),
 	multimodal: z.boolean().default(false),
 	unlisted: z.boolean().default(false),
+	embeddingModel: validateEmbeddingModelByName(embeddingModels).optional(),
 });
 
-const modelsRaw = z.array(modelConfig).parse(JSON.parse(MODELS));
+const modelsRaw = z.array(modelConfig).parse(JSON5.parse(MODELS));
 
 const processModel = async (m: z.infer<typeof modelConfig>) => ({
 	...m,
@@ -138,7 +142,7 @@ export const oldModels = OLD_MODELS
 					displayName: z.string().min(1).optional(),
 				})
 			)
-			.parse(JSON.parse(OLD_MODELS))
+			.parse(JSON5.parse(OLD_MODELS))
 			.map((m) => ({ ...m, id: m.id || m.name, displayName: m.displayName || m.name }))
 	: [];
 
@@ -147,11 +151,11 @@ export const validateModel = (_models: BackendModel[]) => {
 	return z.enum([_models[0].id, ..._models.slice(1).map((m) => m.id)]);
 };
 
-// if `TASK_MODEL` is the name of a model we use it, else we try to parse `TASK_MODEL` as a model config itself
+// if `TASK_MODEL` is string & name of a model in `MODELS`, then we use `MODELS[TASK_MODEL]`, else we try to parse `TASK_MODEL` as a model config itself
 
 export const smallModel = TASK_MODEL
 	? (models.find((m) => m.name === TASK_MODEL) ||
-			(await processModel(modelConfig.parse(JSON.parse(TASK_MODEL))).then((m) =>
+			(await processModel(modelConfig.parse(JSON5.parse(TASK_MODEL))).then((m) =>
 				addEndpoint(m)
 			))) ??
 	  defaultModel

@@ -8,6 +8,7 @@ pinned: false
 license: apache-2.0
 base_path: /chat
 app_port: 3000
+failure_strategy: rollback
 ---
 
 # Chat UI
@@ -20,9 +21,10 @@ A chat interface using open source models, eg OpenAssistant or Llama. It is a Sv
 1. [Setup](#setup)
 2. [Launch](#launch)
 3. [Web Search](#web-search)
-4. [Extra parameters](#extra-parameters)
-5. [Deploying to a HF Space](#deploying-to-a-hf-space)
-6. [Building](#building)
+4. [Text Embedding Models](#text-embedding-models)
+5. [Extra parameters](#extra-parameters)
+6. [Deploying to a HF Space](#deploying-to-a-hf-space)
+7. [Building](#building)
 
 ## No Setup Deploy
 
@@ -78,9 +80,49 @@ Chat UI features a powerful Web Search feature. It works by:
 
 1. Generating an appropriate search query from the user prompt.
 2. Performing web search and extracting content from webpages.
-3. Creating embeddings from texts using [transformers.js](https://huggingface.co/docs/transformers.js). Specifically, using [Xenova/gte-small](https://huggingface.co/Xenova/gte-small) model.
+3. Creating embeddings from texts using a text embedding model.
 4. From these embeddings, find the ones that are closest to the user query using a vector similarity search. Specifically, we use `inner product` distance.
 5. Get the corresponding texts to those closest embeddings and perform [Retrieval-Augmented Generation](https://huggingface.co/papers/2005.11401) (i.e. expand user prompt by adding those texts so that an LLM can use this information).
+
+## Text Embedding Models
+
+By default (for backward compatibility), when `TEXT_EMBEDDING_MODELS` environment variable is not defined, [transformers.js](https://huggingface.co/docs/transformers.js) embedding models will be used for embedding tasks, specifically, [Xenova/gte-small](https://huggingface.co/Xenova/gte-small) model.
+
+You can customize the embedding model by setting `TEXT_EMBEDDING_MODELS` in your `.env.local` file. For example:
+
+```env
+TEXT_EMBEDDING_MODELS = `[
+  {
+    "name": "Xenova/gte-small",
+    "displayName": "Xenova/gte-small",
+    "description": "locally running embedding",
+    "chunkCharLength": 512,
+    "endpoints": [
+      {"type": "transformersjs"}
+    ]
+  },
+  {
+    "name": "intfloat/e5-base-v2",
+    "displayName": "intfloat/e5-base-v2",
+    "description": "hosted embedding model",
+    "chunkCharLength": 768,
+    "preQuery": "query: ", # See https://huggingface.co/intfloat/e5-base-v2#faq
+    "prePassage": "passage: ", # See https://huggingface.co/intfloat/e5-base-v2#faq
+    "endpoints": [
+      {
+        "type": "tei",
+        "url": "http://127.0.0.1:8080/",
+        "authorization": "TOKEN_TYPE TOKEN" // optional authorization field. Example: "Basic VVNFUjpQQVNT"
+      }
+    ]
+  }
+]`
+```
+
+The required fields are `name`, `chunkCharLength` and `endpoints`.
+Supported text embedding backends are: [`transformers.js`](https://huggingface.co/docs/transformers.js) and [`TEI`](https://github.com/huggingface/text-embeddings-inference). `transformers.js` models run locally as part of `chat-ui`, whereas `TEI` models run in a different environment & accessed through an API endpoint.
+
+When more than one embedding models are supplied in `.env.local` file, the first will be used by default, and the others will only be used on LLM's which configured `embeddingModel` to the name of the model.
 
 ## Extra parameters
 
@@ -133,36 +175,33 @@ You can customize the parameters passed to the model or even use a new model by 
 ```env
 MODELS=`[
   {
-    "name": "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
-    "datasetName": "OpenAssistant/oasst1",
-    "description": "A good alternative to ChatGPT",
-    "websiteUrl": "https://open-assistant.io",
-    "userMessageToken": "<|prompter|>", # This does not need to be a token, can be any string
-    "assistantMessageToken": "<|assistant|>", # This does not need to be a token, can be any string
-    "userMessageEndToken": "<|endoftext|>", # Applies only to user messages. Can be any string.
-    "assistantMessageEndToken": "<|endoftext|>", # Applies only to assistant messages. Can be any string.
-    "preprompt": "Below are a series of dialogues between various people and an AI assistant. The AI tries to be helpful, polite, honest, sophisticated, emotionally aware, and humble but knowledgeable. The assistant is happy to help with almost anything and will do its best to understand exactly what is needed. It also tries to avoid giving false or misleading information, and it caveats when it isn't entirely sure about the right answer. That said, the assistant is practical and really does its best, and doesn't let caution get too much in the way of being useful.\n-----\n",
+    "name": "mistralai/Mistral-7B-Instruct-v0.2",
+    "displayName": "mistralai/Mistral-7B-Instruct-v0.2",
+    "description": "Mistral 7B is a new Apache 2.0 model, released by Mistral AI that outperforms Llama2 13B in benchmarks.",
+    "websiteUrl": "https://mistral.ai/news/announcing-mistral-7b/",
+    "preprompt": "",
+    "chatPromptTemplate" : "<s>{{#each messages}}{{#ifUser}}[INST] {{#if @first}}{{#if @root.preprompt}}{{@root.preprompt}}\n{{/if}}{{/if}}{{content}} [/INST]{{/ifUser}}{{#ifAssistant}}{{content}}</s>{{/ifAssistant}}{{/each}}",
+    "parameters": {
+      "temperature": 0.3,
+      "top_p": 0.95,
+      "repetition_penalty": 1.2,
+      "top_k": 50,
+      "truncate": 3072,
+      "max_new_tokens": 1024,
+      "stop": ["</s>"]
+    },
     "promptExamples": [
       {
         "title": "Write an email from bullet list",
         "prompt": "As a restaurant owner, write a professional email to the supplier to get these products every week: \n\n- Wine (x10)\n- Eggs (x24)\n- Bread (x12)"
       }, {
         "title": "Code a snake game",
-        "prompt": "Code a basic snake game in python and give explanations for each step."
+        "prompt": "Code a basic snake game in python, give explanations for each step."
       }, {
         "title": "Assist in a task",
         "prompt": "How do I make a delicious lemon cheesecake?"
       }
-    ],
-    "parameters": {
-      "temperature": 0.9,
-      "top_p": 0.95,
-      "repetition_penalty": 1.2,
-      "top_k": 50,
-      "truncate": 1000,
-      "max_new_tokens": 1024,
-      "stop": ["<|endoftext|>"]  # This does not need to be tokens, can be any list of strings
-    }
+    ]
   }
 ]`
 
@@ -187,7 +226,7 @@ The following is the default `chatPromptTemplate`, although newlines and indenti
 
 #### Multi modal model
 
-We currently only support IDEFICS as a multimodal model, hosted on TGI. You can enable it by using the followin config (if you have a PRO HF Api token):
+We currently only support IDEFICS as a multimodal model, hosted on TGI. You can enable it by using the following config (if you have a PRO HF Api token):
 
 ```env
     {
@@ -274,6 +313,75 @@ MODELS=`[{
       "endpoints" : [{
         "type": "openai"
       }]
+}]`
+```
+
+You may also consume any model provider that provides compatible OpenAI API endpoint. For example, you may self-host [Portkey](https://github.com/Portkey-AI/gateway) gateway and experiment with Claude or GPTs offered by Azure OpenAI. Example for Claude from Anthropic:
+
+```
+MODELS=`[{
+  "name": "claude-2.1",
+  "displayName": "Claude 2.1",
+  "description": "Anthropic has been founded by former OpenAI researchers...",
+  "parameters": {
+      "temperature": 0.5,
+      "max_new_tokens": 4096,
+  },
+  "endpoints": [
+      {
+          "type": "openai",
+          "baseURL": "https://gateway.example.com/v1",
+          "defaultHeaders": {
+              "x-portkey-config": '{"provider":"anthropic","api_key":"sk-ant-abc...xyz"}'
+          }
+      }
+  ]
+}]`
+```
+
+Example for GPT 4 deployed on Azure OpenAI:
+
+```
+MODELS=`[{
+  "id": "gpt-4-1106-preview",
+  "name": "gpt-4-1106-preview",
+  "displayName": "gpt-4-1106-preview",
+  "parameters": {
+      "temperature": 0.5,
+      "max_new_tokens": 4096,
+  },
+  "endpoints": [
+      {
+          "type": "openai",
+          "baseURL": "https://gateway.example.com/v1",
+          "defaultHeaders": {
+              "x-portkey-config": '{"provider":"azure-openai","resource_name":"abc-fr","deployment_id":"gpt-4-1106-preview","api_version":"2023-03-15-preview","api_key":"abc...xyz"}'
+          }
+      }
+  ]
+}]`
+```
+
+Or try Mistral from [Deepinfra](https://deepinfra.com/mistralai/Mistral-7B-Instruct-v0.1/api?example=openai-http):
+
+> Note, apiKey can either be set custom per endpoint, or globally using `OPENAI_API_KEY` variable.
+
+```
+MODELS=`[{
+  "name": "mistral-7b",
+  "displayName": "Mistral 7B",
+  "description": "A 7B dense Transformer, fast-deployed and easily customisable. Small, yet powerful for a variety of use cases. Supports English and code, and a 8k context window.",
+  "parameters": {
+      "temperature": 0.5,
+      "max_new_tokens": 4096,
+  },
+  "endpoints": [
+      {
+          "type": "openai",
+          "baseURL": "https://api.deepinfra.com/v1/openai",
+          "apiKey": "abc...xyz"
+      }
+  ]
 }]`
 ```
 
@@ -390,10 +498,10 @@ You can then add the generated information and the `authorization` parameter to 
 
 ```env
 "endpoints": [
-{
-"url": "https://HOST:PORT",
-"authorization": "Basic VVNFUjpQQVNT",
-}
+  {
+    "url": "https://HOST:PORT",
+    "authorization": "Basic VVNFUjpQQVNT",
+  }
 ]
 ```
 
@@ -405,15 +513,15 @@ If the model being hosted will be available on multiple servers/instances add th
 
 ```env
 "endpoints": [
-{
-"url": "https://HOST:PORT",
-"weight": 1
-}
-{
-"url": "https://HOST:PORT",
-"weight": 2
-}
-...
+  {
+    "url": "https://HOST:PORT",
+    "weight": 1
+  },
+  {
+    "url": "https://HOST:PORT",
+    "weight": 2
+  }
+  ...
 ]
 ```
 
@@ -424,6 +532,45 @@ Custom endpoints may require client certificate authentication, depending on how
 If you're using a certificate signed by a private CA, you will also need to add the `CA_PATH` parameter to your `.env.local`. This parameter should point to the location of the CA certificate file on your local machine.
 
 If you're using a self-signed certificate, e.g. for testing or development purposes, you can set the `REJECT_UNAUTHORIZED` parameter to `false` in your `.env.local`. This will disable certificate validation, and allow Chat UI to connect to your custom endpoint.
+
+#### Specific Embedding Model
+
+A model can use any of the embedding models defined in `.env.local`, (currently used when web searching),
+by default it will use the first embedding model, but it can be changed with the field `embeddingModel`:
+
+```env
+TEXT_EMBEDDING_MODELS = `[
+  {
+    "name": "Xenova/gte-small",
+    "chunkCharLength": 512,
+    "endpoints": [
+      {"type": "transformersjs"}
+    ]
+  },
+  {
+    "name": "intfloat/e5-base-v2",
+    "chunkCharLength": 768,
+    "endpoints": [
+      {"type": "tei", "url": "http://127.0.0.1:8080/", "authorization": "Basic VVNFUjpQQVNT"},
+      {"type": "tei", "url": "http://127.0.0.1:8081/"}
+    ]
+  }
+]`
+
+MODELS=`[
+  {
+      "name": "Ollama Mistral",
+      "chatPromptTemplate": "...",
+      "embeddingModel": "intfloat/e5-base-v2"
+      "parameters": {
+        ...
+      },
+      "endpoints": [
+        ...
+      ]
+  }
+]`
+```
 
 ## Deploying to a HF Space
 
@@ -440,3 +587,29 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## Config changes for HuggingChat
+
+The config file for HuggingChat is stored in the `.env.template` file at the root of the repository. It is the single source of truth that is used to generate the actual `.env.local` file using our CI/CD pipeline. See [updateProdEnv](https://github.com/huggingface/chat-ui/blob/cdb33a9583f5339ade724db615347393ef48f5cd/scripts/updateProdEnv.ts) for more details.
+
+> [!TIP]
+> If you want to make changes to model config for HuggingChat, you should do so against `.env.template`.
+
+We currently use the following secrets for deploying HuggingChat in addition to the `.env.template` above:
+
+- `MONGODB_URL`
+- `HF_TOKEN`
+- `OPENID_CONFIG`
+- `SERPER_API_KEY`
+
+They are defined as secrets in the repository.
+
+### Testing config changes locally
+
+You can test the config changes locally by first creating an `.env.SECRET_CONFIG` file with the secrets defined above. Then you can run the following command to generate the `.env.local` file:
+
+```bash
+npm run updateLocalEnv
+```
+
+This will replace your `.env.local` file with the one that will be used in prod (simply taking `.env.template + .env.SECRET_CONFIG`).

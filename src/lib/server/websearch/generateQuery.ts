@@ -3,11 +3,12 @@ import { format } from "date-fns";
 import { generateFromDefaultEndpoint } from "../generateFromDefaultEndpoint";
 import { WEBSEARCH_ALLOWLIST, WEBSEARCH_BLOCKLIST } from "$env/static/private";
 import { z } from "zod";
+import JSON5 from "json5";
 
 const listSchema = z.array(z.string()).default([]);
 
-const allowList = listSchema.parse(JSON.parse(WEBSEARCH_ALLOWLIST));
-const blockList = listSchema.parse(JSON.parse(WEBSEARCH_BLOCKLIST));
+const allowList = listSchema.parse(JSON5.parse(WEBSEARCH_ALLOWLIST));
+const blockList = listSchema.parse(JSON5.parse(WEBSEARCH_BLOCKLIST));
 
 const queryModifier = [
 	...allowList.map((item) => "site:" + item),
@@ -39,7 +40,7 @@ Current Question: What about Mexico?
 			content: `Previous questions: 
 - When is the next formula 1 grand prix?
 
-Current Question: Where is it being hosted ?`,
+Current Question: Where is it being hosted?`,
 		},
 		{
 			from: "assistant",
@@ -53,12 +54,12 @@ Current Question: Where is it being hosted ?`,
 			from: "assistant",
 			content: "Epson F2270 DTG printer printhead",
 		},
-		{ from: "user", content: "What were the news yesterday ?" },
+		{ from: "user", content: "What were the news yesterday?" },
 		{
 			from: "assistant",
 			content: `news ${format(new Date(Date.now() - 864e5), "MMMM d, yyyy")}`,
 		},
-		{ from: "user", content: "What is the current weather in Paris ?" },
+		{ from: "user", content: "What is the current weather in Paris?" },
 		{ from: "assistant", content: `weather in Paris ${currentDate}` },
 		{
 			from: "user",
@@ -68,7 +69,7 @@ Current Question: Where is it being hosted ?`,
 							.map(({ content }) => `- ${content}`)
 							.join("\n")}`
 					: "") +
-				"\n\nCurrent Question:" +
+				"\n\nCurrent Question: " +
 				lastMessage.content,
 		},
 	];

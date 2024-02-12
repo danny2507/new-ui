@@ -5,13 +5,13 @@
 	import Logo from "$lib/components/icons/Logo.svelte";
 	import { createEventDispatcher } from "svelte";
 	import IconGear from "~icons/bi/gear-fill";
-	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 	import AnnouncementBanner from "../AnnouncementBanner.svelte";
 	import type { Model } from "$lib/types/Model";
 	import ModelCardMetadata from "../ModelCardMetadata.svelte";
 	import { findCurrentModel } from "$lib/utils/models";
 	import { base } from "$app/paths";
 	import { useSettingsStore } from "$lib/stores/settings";
+	import JSON5 from "json5";
 
 	export let currentModel: Model;
 	export let models: Model[];
@@ -21,7 +21,7 @@
 	$: currentModelMetadata = findCurrentModel(models, $settings.activeModel);
 
 	const announcementBanners = PUBLIC_ANNOUNCEMENT_BANNERS
-		? JSON.parse(PUBLIC_ANNOUNCEMENT_BANNERS)
+		? JSON5.parse(PUBLIC_ANNOUNCEMENT_BANNERS)
 		: [];
 
 	const dispatch = createEventDispatcher<{ message: string }>();
@@ -51,8 +51,7 @@
 				<a
 					target="_blank"
 					href={banner.linkHref}
-					class="mr-2 flex items-center underline hover:no-underline"
-					><CarbonArrowUpRight class="mr-1.5 text-xs" /> {banner.linkTitle}</a
+					class="mr-2 flex items-center underline hover:no-underline">{banner.linkTitle}</a
 				>
 			</AnnouncementBanner>
 		{/each}

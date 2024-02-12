@@ -34,22 +34,24 @@
 		</h2>
 
 		{#if model.description}
-			<p class=" text-gray-600">
+			<p class="whitespace-pre-wrap text-gray-600">
 				{model.description}
 			</p>
 		{/if}
 	</div>
 
 	<div class="flex flex-wrap items-center gap-2 md:gap-4">
-		<a
-			href={model.modelUrl || "https://huggingface.co/" + model.name}
-			target="_blank"
-			rel="noreferrer"
-			class="flex items-center truncate underline underline-offset-2"
-		>
-			<CarbonArrowUpRight class="mr-1.5 shrink-0 text-xs " />
-			Model page
-		</a>
+		{#if model.modelUrl}
+			<a
+				href={model.modelUrl || "https://huggingface.co/" + model.name}
+				target="_blank"
+				rel="noreferrer"
+				class="flex items-center truncate underline underline-offset-2"
+			>
+				<CarbonArrowUpRight class="mr-1.5 shrink-0 text-xs " />
+				Model page
+			</a>
+		{/if}
 
 		{#if model.datasetName || model.datasetUrl}
 			<a
@@ -78,7 +80,7 @@
 			value="{PUBLIC_ORIGIN || $page.url.origin}{base}?model={model.id}"
 			classNames="!border-none !shadow-none !py-0 !px-1 !rounded-md"
 		>
-			<div class="flex items-center gap-1.5">
+			<div class="flex items-center gap-1.5 hover:underline">
 				<CarbonLink />Copy direct link to model
 			</div>
 		</CopyToClipBoardBtn>
