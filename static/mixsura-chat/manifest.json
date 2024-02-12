@@ -6,17 +6,17 @@
 	"start_url": "/",
 	"icons": [
 		{
-			"src": "/hcmut/icon-128x128.png",
+			"src": "icon-128x128.png",
 			"sizes": "128x128",
 			"type": "image/png"
 		},
 		{
-			"src": "/hcmut/icon-256x256.png",
+			"src": "icon-256x256.png",
 			"sizes": "256x256",
 			"type": "image/png"
 		},
 		{
-			"src": "/hcmut/icon-512x512.png",
+			"src": "icon-512x512.png",
 			"sizes": "512x512",
 			"type": "image/png"
 		}
