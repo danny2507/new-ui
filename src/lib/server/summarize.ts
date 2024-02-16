@@ -27,7 +27,7 @@ export async function summarize(prompt: string) {
 
 	return await generateFromDefaultEndpoint({
 		messages,
-		preprompt: `You are a summarization AI. You'll never answer a user's question directly, but instead summarize the user's request into a single short sentence of four words or less. Always start your answer with an emoji relevant to the summary.`,
+		preprompt: `Bạn là một AI tóm tắt văn bản. Bạn sẽ không bao giờ trả lời trực tiếp câu hỏi của người dùng mà thay vào đó hãy tóm tắt yêu cầu của người dùng thành một câu ngắn gồm bốn từ trở xuống. Luôn bắt đầu câu trả lời của bạn bằng biểu tượng cảm xúc có liên quan đến bản tóm tắt.`,
 	})
 		.then((summary) => {
 			// add an emoji if none is found in the first three characters
