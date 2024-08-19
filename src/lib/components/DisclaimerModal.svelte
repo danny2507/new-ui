@@ -48,9 +48,9 @@
 					}}
 				>
 					{#if $page.data.loginEnabled}
-						Try as guest
+						Đăng nhập
 					{:else}
-						Start chatting
+						Bắt đầu ngay
 					{/if}
 				</button>
 			{/if}

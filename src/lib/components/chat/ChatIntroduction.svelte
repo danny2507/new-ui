@@ -30,18 +30,28 @@
 <div class="my-auto grid gap-8 lg:grid-cols-3">
 	<div class="lg:col-span-1">
 		<div>
-			<div class="mb-3 flex items-center text-2xl font-semibold">
-				<Logo classNames="mr-1 flex-none" />
+			<div class="mb-3 flex items-center whitespace-nowrap text-xl font-semibold">
+				<a href="https://hcmut.edu.vn/" target="_blank" rel="noopener noreferrer" class="block">
+					<Logo classNames="mr-1 flex-none w-10 h-10 cursor-pointer block" />
+				  </a>
 				{PUBLIC_APP_NAME}
 				<div
 					class="ml-3 flex h-6 items-center rounded-lg border border-gray-100 bg-gray-50 px-2 text-base text-gray-400 dark:border-gray-700/60 dark:bg-gray-800"
 				>
-					v{PUBLIC_VERSION}
+					v3
 				</div>
 			</div>
-			<p class="text-base text-gray-600 dark:text-gray-400">
-				{PUBLIC_APP_DESCRIPTION ||
-					"Making the community's best AI chat models available to everyone."}
+			<p class="flex items-center whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+				<span>
+					Được phát triển bởi nhóm nghiên cứu URA
+					<a href="https://www.ura.hcmut.edu.vn/" target="_blank" rel="noopener noreferrer">
+						<img
+							class="ml-1 inline-block aspect-square size-5 rounded border dark:border-gray-700"
+							src="https://www.ura.hcmut.edu.vn/wp-content/uploads/2023/11/URA_logo_1024.png"
+							alt="Logo"
+						/>
+					</a>
+				</span>
 			</p>
 		</div>
 	</div>
@@ -58,8 +68,17 @@
 		<div class="overflow-hidden rounded-xl border dark:border-gray-800">
 			<div class="flex p-3">
 				<div>
-					<div class="text-sm text-gray-600 dark:text-gray-400">Current Model</div>
-					<div class="font-semibold">{currentModel.displayName}</div>
+					<div class="text-sm text-gray-600 dark:text-gray-400">Mô hình hiện tại</div>
+					<div class="flex items-center gap-1.5 font-semibold max-sm:text-smd">
+						<a href="https://www.ura.hcmut.edu.vn/" target="_blank" rel="noopener noreferrer">
+							<img
+								class="overflown aspect-square size-4 rounded border dark:border-gray-700"
+								src="https://www.ura.hcmut.edu.vn/wp-content/uploads/2023/11/URA_logo_1024.png"
+								alt="Logo"
+							/>
+						</a>
+						{currentModel.displayName}
+					</div>
 				</div>
 				<a
 					href="{base}/settings/{currentModel.id}"
@@ -72,7 +91,7 @@
 	</div>
 	{#if currentModelMetadata.promptExamples}
 		<div class="lg:col-span-3 lg:mt-6">
-			<p class="mb-3 text-gray-600 dark:text-gray-300">Examples</p>
+			<p class="mb-3 text-gray-600 dark:text-gray-300">Các ví dụ</p>
 			<div class="grid gap-3 lg:grid-cols-3 lg:gap-5">
 				{#each currentModelMetadata.promptExamples as example}
 					<button

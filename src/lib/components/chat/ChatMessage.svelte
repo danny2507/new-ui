@@ -212,7 +212,7 @@
 					{message.score && message.score > 0
 						? 'text-green-500 hover:text-green-500 dark:text-green-400 hover:dark:text-green-400'
 						: ''}"
-					title={message.score === 1 ? "Remove +1" : "+1"}
+					title={message.score === 1 ? "-1" : "+1"}
 					type="button"
 					on:click={() => dispatch("vote", { score: message.score === 1 ? 0 : 1, id: message.id })}
 				>
@@ -223,7 +223,7 @@
 					{message.score && message.score < 0
 						? 'text-red-500 hover:text-red-500 dark:text-red-400 hover:dark:text-red-400'
 						: ''}"
-					title={message.score === -1 ? "Remove -1" : "-1"}
+					title={message.score === -1 ? "+1" : "-1"}
 					type="button"
 					on:click={() =>
 						dispatch("vote", { score: message.score === -1 ? 0 : -1, id: message.id })}
@@ -287,7 +287,7 @@
 					{#if !readOnly}
 						<button
 							class="cursor-pointer rounded-lg border border-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 md:hidden lg:-right-2 dark:border-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-							title="Retry"
+							title="Thử lại"
 							type="button"
 							on:click={() => dispatch("retry", { content: message.content, id: message.id })}
 						>

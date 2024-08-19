@@ -20,8 +20,8 @@
 		rel="noreferrer"
 		class="flex items-center hover:underline"
 		><CarbonArrowUpRight class="mr-1.5 shrink-0 text-xs text-gray-400" />
-		Model
-		<div class="max-sm:hidden">&nbsp;page</div></a
+		Xem mô hình gốc tại đây
+		<div class="max-sm:hidden"></div></a
 	>
 	{#if model.datasetName || model.datasetUrl}
 		<a
@@ -42,7 +42,7 @@
 			rel="noreferrer"
 		>
 			<CarbonEarth class="mr-1.5 shrink-0 text-xs text-gray-400" />
-			Website
+			Web Khoa CSE
 		</a>
 	{/if}
 </div>

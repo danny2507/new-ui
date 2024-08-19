@@ -75,9 +75,9 @@
 		<button
 			type="button"
 			class="flex h-5 w-5 items-center justify-center rounded md:hidden md:group-hover:flex"
-			title="Edit conversation title"
+			title="Đặt chủ đề cuộc trò chuyện"
 			on:click|preventDefault={() => {
-				const newTitle = prompt("Edit this conversation title:", conv.title);
+				const newTitle = prompt("Thay đổi chủ đề cuộc trò chuyện này:", conv.title);
 				if (!newTitle) return;
 				dispatch("editConversationTitle", { id: conv.id, title: newTitle });
 			}}
@@ -88,7 +88,7 @@
 		<button
 			type="button"
 			class="flex h-5 w-5 items-center justify-center rounded md:hidden md:group-hover:flex"
-			title="Delete conversation"
+			title="Xóa cuộc trò chuyện"
 			on:click|preventDefault={(event) => {
 				if (event.shiftKey) {
 					dispatch("deleteConversation", conv.id);

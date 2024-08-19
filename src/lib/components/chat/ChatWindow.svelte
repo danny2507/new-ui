@@ -206,10 +206,10 @@
 				{:else}
 					<div class="flex w-full flex-1 border-none bg-transparent">
 						{#if lastIsError}
-							<ChatInput value="Sorry, something went wrong. Please try again." disabled={true} />
+							<ChatInput value="Xin lỗi bạn, hệ thống đã xảy ra lỗi. Vui lòng thử lại." disabled={true} />
 						{:else}
 							<ChatInput
-								placeholder="Ask anything"
+								placeholder="Hỏi bất kỳ điều gì"
 								bind:value={message}
 								on:submit={handleSubmit}
 								on:beforeinput={(ev) => {
@@ -251,7 +251,7 @@
 				class="mt-2 flex justify-between self-stretch px-1 text-xs text-gray-400/90 max-md:mb-2 max-sm:gap-2"
 			>
 				<p>
-					Model:
+					Mô hình:
 					{#if !assistant}
 						<a href="{base}/settings/{currentModel.id}" class="hover:underline"
 							>{currentModel.displayName}</a
@@ -261,8 +261,7 @@
 							href="{base}/settings/assistants/{assistant._id}"
 							class="inline-flex items-center border-b hover:text-gray-600 dark:border-gray-700 dark:hover:text-gray-300"
 							>{model?.displayName}<CarbonCaretDown class="text-xxs" /></a
-						>{/if} <span class="max-sm:hidden">·</span><br class="sm:hidden" /> Generated content may
-					be inaccurate or false.
+						>{/if} <span class="max-sm:hidden">·</span><br class="sm:hidden" /> Nội dung sinh ra có thể không chính xác hoặc sai lệch.
 				</p>
 				{#if messages.length}
 					<button
@@ -274,10 +273,10 @@
 					>
 						{#if isSharedRecently}
 							<CarbonCheckmark class="text-[.6rem] sm:mr-1.5 sm:text-green-600" />
-							<div class="text-green-600 max-sm:hidden">Link copied to clipboard</div>
+							<div class="text-green-600 max-sm:hidden">Đã sao chép đường dẫn vào bộ nhớ tạm</div>
 						{:else}
 							<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
-							<div class="max-sm:hidden">Share this conversation</div>
+							<div class="max-sm:hidden">Chia sẻ cuộc trò chuyện này</div>
 						{/if}
 					</button>
 				{/if}
