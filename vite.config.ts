@@ -18,12 +18,16 @@ function loadTTFAsArrayBuffer(): PluginOption {
 }
 
 export default defineConfig({
+ build: {
+    outDir: 'public',
+	},
 	plugins: [
 		sveltekit(),
 		Icons({
 			compiler: "svelte",
 		}),
 		loadTTFAsArrayBuffer(),
+		
 	],
 	optimizeDeps: {
 		include: ["browser-image-resizer"],
