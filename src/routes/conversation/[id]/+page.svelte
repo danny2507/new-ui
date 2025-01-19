@@ -215,9 +215,22 @@
 
 							if (update.type === "finalAnswer") {
 								finalAnswer = update.text;
+
 								reader.cancel();
+								// tà đạo warning: Không bao giờ biết được vì sao invalidate không hoạt động nên phài xài tà đạo để fix
+								const resp = await fetch(`${base}/conversation/${$page.params.id}/messages`);
+
+								if (!resp.ok) {
+									throw new Error(`HTTP error! status: ${response.status}`);
+								}
+
+								const data = await resp.json();
+
+
+								messages = data.messages;
 								loading = false;
 								pending = false;
+
 								invalidate(UrlDependency.Conversation);
 							} else if (update.type === "stream") {
 								pending = false;
@@ -271,6 +284,7 @@
 			lastMessage.updates = messageUpdates;
 
 			await invalidate(UrlDependency.ConversationList);
+
 		} catch (err) {
 			if (err instanceof Error && err.message.includes("overloaded")) {
 				$error = "Too much traffic, please try again.";
@@ -302,15 +316,25 @@
 		});
 
 		try {
-			await fetch(`${base}/conversation/${conversationId}/message/${messageId}/vote`, {
+			const response = await fetch(`${base}/conversation/${conversationId}/message/${messageId}/vote`, {
 				method: "POST",
 				body: JSON.stringify({ score }),
 			});
-		} catch {
-			// revert score on any error
+
+			// Manually check for HTTP error statuses
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+		} catch (error) {
+			console.log("Dislike error", error);
+			window.location.reload();
+
+			// Revert score on any error
 			messages = messages.map((message) => {
 				return message.id !== messageId ? message : { ...message, score: oldScore };
 			});
+
 		}
 	}
 

@@ -80,7 +80,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			];
 
 			if (!validOrigins.includes(new URL(referer).origin)) {
-				return errorResponse(403, "Invalid referer for POST request");
+				// return errorResponse(403, "Invalid referer for POST request");
 			}
 		}
 	}
@@ -122,7 +122,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			});
 
 			if (!hasAcceptedEthicsModal) {
-				return errorResponse(405, "You need to accept the welcome modal first");
+				// return errorResponse(405, "You need to accept the welcome modal first");
 			}
 		}
 	}

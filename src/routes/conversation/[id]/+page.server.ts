@@ -27,6 +27,7 @@ export const load = async ({ params, depends, locals }) => {
 		});
 
 		depends(UrlDependency.Conversation);
+		console.log("messages load convo is triggered...")
 
 		if (!conversation) {
 			const conversationExists =
